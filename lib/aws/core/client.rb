@@ -437,6 +437,8 @@ module AWS
               response.request_type = name
               response.request_options = options
 
+              return response if options[:pretend] == true
+
               if
                 cacheable_request?(name, options) and
                 cache = AWS.response_cache and
@@ -484,6 +486,7 @@ module AWS
         # we dont want to pass the async option to the configure block
         opts = options.dup
         opts.delete(:async)
+        auth_headers = opts.delete(:auth_headers)
 
         http_request = new_request
         http_request.access_key_id = credential_provider.access_key_id
@@ -503,7 +506,13 @@ module AWS
         send("configure_#{name}_request", http_request, opts)
 
         http_request.headers["user-agent"] = user_agent_string
-        http_request.add_authorization!(credential_provider)
+        
+        if auth_headers
+          http_request.headers["authorization"] = auth_headers["authorization"] 
+          http_request.headers["date"] = auth_headers["date"]  
+        else
+          http_request.add_authorization!(credential_provider)
+        end
 
         http_request
 
