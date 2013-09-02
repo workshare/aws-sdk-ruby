@@ -21,9 +21,13 @@ module AWS
 
       # @param [String] value
       # @return [String] Returns a URI escaped string.
-      def escape value
+      def escape value, is_path = false
         value = value.encode("UTF-8") if value.respond_to?(:encode)
-        CGI::escape(value.to_s).gsub('+', '%20').gsub('%7E', '~')
+        if is_path
+          escape_rfc3986(value.to_s)
+        else
+          CGI::escape(value.to_s).gsub('+', '%20')
+        end.gsub('%7E', '~')
       end
       module_function :escape
 
@@ -33,12 +37,18 @@ module AWS
       def escape_path value
         escaped = ""
         value.scan(%r{(/*)([^/]*)(/*)}) do |(leading, part, trailing)|
-          escaped << leading + escape(part) + trailing
+          escaped << leading + escape(part, true) + trailing
         end
         escaped
       end
       module_function :escape_path
 
+      private
+      def escape_rfc3986(string)
+        string.gsub(/([^ !$&'\(\)\*\+,;=a-zA-Z0-9_.-]+)/) do
+          '%' + $1.unpack('H2' * $1.bytesize).join('%').upcase
+        end.gsub(' ', '%20')
+      end
     end
   end
 end
