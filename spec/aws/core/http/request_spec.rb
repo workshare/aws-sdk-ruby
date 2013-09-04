@@ -138,6 +138,11 @@ module AWS::Core
           r.path.should == '/abc'
         end
 
+        it 'no encode the sub-delims chars (rtf3986)' do
+          r = Request.new
+          r.uri = "/!$&'\(\)\*\+,;=?mno=xyz"
+          r.path.should == "/!$&'\(\)\*\+,;="
+        end
       end
 
       context '#querystring' do

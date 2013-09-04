@@ -473,13 +473,21 @@ module AWS
               client = self
 
               response = new_response do
+                auth_headers = options[:auth_headers]
                 req = client.send(:build_request, name, options)
-                req.add_authorization!(credential_provider)
+                if auth_headers
+                  req.headers["authorization"] = auth_headers["authorization"] 
+                  req.headers["date"] = auth_headers["date"]  
+                else
+                  req.add_authorization!(credential_provider)
+                end
                 req
               end
 
               response.request_type = name
               response.request_options = options
+
+              return response if options[:pretend] == true
 
               if
                 cacheable_request?(name, options) and

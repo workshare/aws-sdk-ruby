@@ -1279,6 +1279,28 @@ module AWS
         value
       end
 
+      def auth_headers
+        options = {}
+        options[:content_length] = 0
+        options[:data] = ""
+
+        add_storage_class_option(options)
+        add_sse_options(options)
+        add_cse_options(options)
+
+        clean_up_options(options)
+
+        options[:bucket_name] = bucket.name
+        options[:key]         = key
+
+        resp = client.put_object(options.merge(:pretend => true))
+
+        {
+          "date" => resp.http_request.headers["date"],
+          "authorization" => resp.http_request.headers["authorization"]
+        }
+      end
+
       private
 
       # Used to determine if the data needs to be copied in parts
