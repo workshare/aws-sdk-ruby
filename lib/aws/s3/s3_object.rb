@@ -1260,8 +1260,7 @@ module AWS
         value
       end
 
-      def auth_headers
-        options = {}
+      def auth_headers options = {}
         options[:content_length] = 0
         options[:data] = ""
 
@@ -1276,10 +1275,7 @@ module AWS
 
         resp = client.put_object(options.merge(:pretend => true))
 
-        {
-          "date" => resp.http_request.headers["date"],
-          "authorization" => resp.http_request.headers["authorization"]
-        }
+        resp.http_request.headers
       end
 
       protected

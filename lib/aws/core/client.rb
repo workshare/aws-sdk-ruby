@@ -508,14 +508,13 @@ module AWS
         http_request.headers["user-agent"] = user_agent_string
         
         if auth_headers
-          http_request.headers["authorization"] = auth_headers["authorization"] 
-          http_request.headers["date"] = auth_headers["date"]  
+          http_request.headers.merge!(auth_headers)
         else
           http_request.add_authorization!(credential_provider)
         end
 
         http_request
-
+        
       end
 
       def user_agent_string
