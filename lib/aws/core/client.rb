@@ -506,6 +506,7 @@ module AWS
         send("configure_#{name}_request", http_request, opts)
 
         http_request.headers["user-agent"] = user_agent_string
+        http_request.headers["x-amz-date"] = Time.now.rfc822 if opts[:pretend] == true
         
         if auth_headers
           http_request.headers.merge!(auth_headers)
