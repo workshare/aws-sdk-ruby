@@ -1084,6 +1084,7 @@ module AWS
                     }) do
 
         configure_request do |req, options|
+          req.headers['content-length']=0
           req.metadata = options[:metadata]
           req.storage_class = options[:storage_class]
           req.server_side_encryption = options[:server_side_encryption]
