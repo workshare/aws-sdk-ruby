@@ -288,19 +288,18 @@ module AWS
       # @private
       private
       def get_complete_opts(part_numbers = nil)
-        parts_resp = client.list_parts(base_opts)
-        complete_opts =
-          base_opts.merge(:parts =>
-                          parts_resp.parts.map do |part|
-                            { :part_number => part.part_number,
-                              :etag => part.etag }
-                          end)
+        parts = []
+        self.parts.each do |part|
+          parts << { :part_number => part.part_number, :etag => part.etag }
+        end
 
-        complete_opts[:parts].reject! do |part|
-          !part_numbers.include?(part[:part_number])
-        end if part_numbers
+        if part_numbers
+          parts.reject! do |part|
+            !part_numbers.include?(part[:part_number])
+          end
+        end
 
-        complete_opts
+        base_opts.merge(:parts => parts)
       end
 
       # @private
