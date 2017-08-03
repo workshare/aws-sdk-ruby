@@ -293,7 +293,7 @@ module AWS
         loop do
           opts = base_opts
           opts = opts.merge(part_number_marker: next_marker) if next_marker
-          parts_resp = client.list_parts(base_opts)
+          parts_resp = client.list_parts(opts)
           parts_resp.parts.each do |part|
             parts << { :part_number => part.part_number, :etag => part.etag }
           end
