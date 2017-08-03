@@ -289,17 +289,25 @@ module AWS
       private
       def get_complete_opts(part_numbers = nil)
         parts = []
-        self.parts.each do |part|
-          parts << { :part_number => part.part_number, :etag => part.etag }
-        end
-
-        if part_numbers
-          parts.reject! do |part|
-            !part_numbers.include?(part[:part_number])
+        next_marker = nil
+        loop do
+          opts = base_opts
+          opts = opts.merge(part_number_marker: next_marker) if next_marker
+          parts_resp = client.list_parts(base_opts)
+          parts_resp.parts.each do |part|
+            parts << { :part_number => part.part_number, :etag => part.etag }
           end
+          break unless parts_resp.truncated
+          next_marker = parts_resp.data[:next_part_number_marker]
         end
 
-        base_opts.merge(:parts => parts)
+        complete_opts = base_opts.merge(:parts => parts)
+
+        complete_opts[:parts].reject! do |part|
+          !part_numbers.include?(part[:part_number])
+        end if part_numbers
+
+        complete_opts
       end
 
       # @private
